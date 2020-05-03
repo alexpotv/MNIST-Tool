@@ -34,5 +34,7 @@ probability_model = tf.keras.Sequential([
     tf.keras.layers.Softmax()
 ])
 
-# Prediction of the first input of x_test
-print(probability_model.predict([data_setup.prepare("test.jpg")]))
+test_set = data_setup.prepare("test.jpg")
+
+# Prediction of the test image
+print(probability_model.predict([test_set[:1]]))
