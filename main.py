@@ -34,7 +34,36 @@ probability_model = tf.keras.Sequential([
     tf.keras.layers.Softmax()
 ])
 
-test_set = data_setup.prepare("test.jpg")
+test_0 = data_setup.prepare("images/0_28.jpg")
+test_1 = data_setup.prepare("images/1_28.jpg")
+test_2 = data_setup.prepare("images/2_28.jpg")
+test_3 = data_setup.prepare("images/3_28.jpg")
+test_4 = data_setup.prepare("images/4_28.jpg")
+test_5 = data_setup.prepare("images/5_28.jpg")
+test_6 = data_setup.prepare("images/6_28.jpg")
+test_7 = data_setup.prepare("images/7_28.jpg")
+test_8 = data_setup.prepare("images/8_28.jpg")
+test_9 = data_setup.prepare("images/9_28.jpg")
 
 # Prediction of the test image
-print(probability_model.predict([test_set[:1]]))
+prediction0 = probability_model.predict([test_0[:1]])[0]
+prediction1 = probability_model.predict([test_1[:1]])[0]
+prediction2 = probability_model.predict([test_2[:1]])[0]
+prediction3 = probability_model.predict([test_3[:1]])[0]
+prediction4 = probability_model.predict([test_4[:1]])[0]
+prediction5 = probability_model.predict([test_5[:1]])[0]
+prediction6 = probability_model.predict([test_6[:1]])[0]
+prediction7 = probability_model.predict([test_7[:1]])[0]
+prediction8 = probability_model.predict([test_8[:1]])[0]
+prediction9 = probability_model.predict([test_9[:1]])[0]
+
+print("The best guess for 0_28.jpg is: ", prediction0.argmax())
+print("The best guess for 1_28.jpg is: ", prediction1.argmax())
+print("The best guess for 2_28.jpg is: ", prediction2.argmax())
+print("The best guess for 3_28.jpg is: ", prediction3.argmax())
+print("The best guess for 4_28.jpg is: ", prediction4.argmax())
+print("The best guess for 5_28.jpg is: ", prediction5.argmax())
+print("The best guess for 6_28.jpg is: ", prediction6.argmax())
+print("The best guess for 7_28.jpg is: ", prediction7.argmax())
+print("The best guess for 8_28.jpg is: ", prediction8.argmax())
+print("The best guess for 9_28.jpg is: ", prediction9.argmax())
