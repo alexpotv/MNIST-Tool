@@ -1,5 +1,5 @@
 import tensorflow as tf
-import input_data
+import data_setup
 
 mnist = tf.keras.datasets.mnist
 
@@ -35,4 +35,4 @@ probability_model = tf.keras.Sequential([
 ])
 
 # Prediction of the first input of x_test
-print(probability_model(x_test[:1]))
+print(probability_model.predict([data_setup.prepare("test.jpg")]))
