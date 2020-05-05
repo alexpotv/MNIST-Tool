@@ -7,16 +7,16 @@
 
 import tensorflow as tf
 import tensorflow_datasets as tfds
-import data_setup
 
-## @function new_model_MNIST
+## @function newModelMNIST
 #  @brief Creates a new model from the available MNIST dataset in TensorFlow.
 #  @details Creates a new model from the available MNIST dataset in TensorFlow. In order to do so,
 #  the dataset is loaded as four different numpy arrays, which are used to train the model, and
 #  then evaluate its metrics.
+#  @param epochNum The number of epochs to run during the training of the model
 #  @return Returns a tuple of length 3 containing, in order, the loss of the model, the accuracy of
 #  the model and the model itself.
-def new_model_MNIST():
+def newModelMNIST(epochNum):
     mnist = tf.keras.datasets.mnist
 
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
@@ -41,7 +41,7 @@ def new_model_MNIST():
                   loss=loss_fn,
                   metrics=['accuracy'])
 
-    model.fit(x_train, y_train, epochs=10)
+    model.fit(x_train, y_train, epochs=epochNum)
 
     metrics = model.evaluate(x_test,  y_test, verbose=2)
 
@@ -53,23 +53,25 @@ def new_model_MNIST():
     return (metrics[0], metrics[1], probability_model)
 
 
-## @function new_model_EMNIST
+## @function newModelEMNIST
 #  @brief Creates a new model from the available EMNIST dataset in TensorFlow.
 #  @details Creates a new model from the available MNIST dataset in TensorFlow. In order to do so,
 #  the dataset is loaded as two different tf.data.dataset objects, which are used to train the
 #  model, and then evaluate its metrics.
+#  @param epochNum The number of epochs to run during the training of the model
 #  @return Returns a tuple of length 3 containing, in order, the loss of the model, the accuracy of
 #  the model and the model itself.
-def new_model_EMNIST():
+def newModelEMNIST(epochNum):
 
-  ## @function generator
-  #  @brief A generator function for iterating through the dataset dictionary objects.
-  #  @details A generator function for iterating through the dataset dictionary objects. Since a
-  #  tf.data.dataset object is not subscriptable, it is passed to the model.fit and model.evaluate
-  #  functions through a generator function. This function gathers the data from the dictionary and
-  #  formats it so that it can be accepted by the model methods.
-  #  @returns Returns a tuple of length 2 containing, in order, the input and output of the data
-  #  point.
+    ## @function generator
+    #  @brief A generator function for iterating through the dataset dictionary objects.
+    #  @details A generator function for iterating through the dataset dictionary objects. Since a
+    #  tf.data.dataset object is not subscriptable, it is passed to the model.fit and model.evaluate
+    #  functions through a generator function. This function gathers the data from the dictionary and
+    #  formats it so that it can be accepted by the model methods.
+    #  @param dataset The dataset to iterate through
+    #  @returns Returns a tuple of length 2 containing, in order, the input and output of the data
+    #  point.
     def generator(dataset):
         for elem in dataset:
             yield (elem.get('image'), elem.get('label'))
@@ -89,7 +91,7 @@ def new_model_EMNIST():
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
 
-    model.fit(generator(emnist_train), epochs=1)
+    model.fit(generator(emnist_train), epochs=epochNum)
 
     metrics = model.evaluate(generator(emnist_test), verbose=2)
 

@@ -14,7 +14,7 @@ import math
 import numpy as np
 
 # Prepares the file for the model. Loads the specified image file in grayscale, and resizes to 28x28.
-## @function prepare
+## @function prepareMNIST
 #  @brief Prepares a file for its interpretation by a MNIST model.
 #  @details Prepares a file for its interpretation by a MNIST model. The function loads the
 #  specified file as a grayscale image, resizes it to fit the 28x28 criteria, removes the black rows
@@ -22,7 +22,7 @@ import numpy as np
 #  the center of mass and fits it inside a 20x20, centered in the original 28x28 image.
 #  @param file The local path to the number image file to prepare
 #  @returns Returns the modified image as a numpy array, ready for interpretation
-def prepare(file):
+def prepareMNIST(file):
 
     ## @function getBestShift
     #  @brief Calculates the shift of an image according to its center of mass.
