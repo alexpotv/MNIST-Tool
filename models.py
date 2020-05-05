@@ -1,3 +1,4 @@
+## 
 import tensorflow as tf
 import tensorflow_datasets as tfds
 import data_setup
@@ -41,8 +42,8 @@ def new_model_MNIST():
 
 def new_model_EMNIST():
   def generator(dataset):
-  for elem in dataset:
-    yield (elem.get('image'), elem.get('label'))
+    for elem in dataset:
+      yield (elem.get('image'), elem.get('label'))
 
   emnist_train = tfds.load('emnist/digits', split="train")
   emnist_test = tfds.load('emnist/digits', split="test")
