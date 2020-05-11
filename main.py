@@ -44,7 +44,7 @@ if (newOrLoad == 'N'):
         print("Model saved as " + modelName + ".h5")
         print("This is the model's architecture: ")
         currentModel.summary()
-    
+
     else:
         print("Invalid.")
 
@@ -58,3 +58,10 @@ elif (newOrLoad == 'E'):
 
 else:
     print("Invalid.")
+
+print("Enter the name of the image file to evaluate: ")
+imageName = input()
+
+preparedImage = data_setup.prepareEMNIST("images/" + imageName)
+predictionForImage = currentModel.predict([preparedImage[:1]])[0]
+print("The best guess for this image is: ", predictionForImage.argmax())

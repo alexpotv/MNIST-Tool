@@ -7,6 +7,45 @@
 
 import tensorflow as tf
 import tensorflow_datasets as tfds
+from itertools import cycle
+
+"""
+class multiGenerator(object):
+    def __init__(self, gFunction, *args, **kwargs):
+        self.__gFunction = gFunction
+        self.__args = args
+        self.__kwargs = kwargs
+        self.__gObject = None
+    def __iter__(self):
+        return self
+    def next(self):
+        if self.__gObject is None:
+            self.__gObject = self.__gFunction(*self.__args, **self.__kwargs)
+        try:
+            return self.__gObject.next()
+        except StopIteration:
+            self.__gObject = None
+            raise
+"""
+
+## @function generator
+#  @brief A generator function for iterating through the dataset dictionary objects.
+#  @details A generator function for iterating through the dataset dictionary objects. Since a
+#  tf.data.dataset object is not subscriptable, it is passed to the model.fit and model.evaluate
+#  functions through a generator function. This function gathers the data from the dictionary and
+#  formats it so that it can be accepted by the model methods.
+#  @param dataset The dataset to iterate through
+#  @returns Returns a tuple of length 2 containing, in order, the input and output of the data
+#  point.
+def _generator(dataset):
+    for elem in dataset:
+        yield (elem.get('image'), elem.get('label'))
+    return
+
+
+def generator(dataset):
+    for elem in cycle(dataset):
+        yield (elem.get('image'), elem.get('label'))
 
 ## @function newModelMNIST
 #  @brief Creates a new model from the available MNIST dataset in TensorFlow.
@@ -63,25 +102,22 @@ def newModelMNIST(epochNum):
 #  the model and the model itself.
 def newModelEMNIST(epochNum):
 
-    ## @function generator
-    #  @brief A generator function for iterating through the dataset dictionary objects.
-    #  @details A generator function for iterating through the dataset dictionary objects. Since a
-    #  tf.data.dataset object is not subscriptable, it is passed to the model.fit and model.evaluate
-    #  functions through a generator function. This function gathers the data from the dictionary and
-    #  formats it so that it can be accepted by the model methods.
-    #  @param dataset The dataset to iterate through
-    #  @returns Returns a tuple of length 2 containing, in order, the input and output of the data
-    #  point.
-    def generator(dataset):
-        for elem in dataset:
-            yield (elem.get('image'), elem.get('label'))
+    datasets = tfds.load(name='emnist/digits', as_supervised=True)
 
+    emnist_train = datasets['train']
+    emnist_test = datasets['test']
 
-    emnist_train = tfds.load('emnist/digits', split="train")
-    emnist_test = tfds.load('emnist/digits', split="test")
+    def scale(image, label):
+        image = tf.cast(image, tf.float32)
+        image /= 255.0
+
+        return image, label
+
+    emnist_train = emnist_train.map(scale).shuffle(10000).batch(240000)
+    emnist_test = emnist_test.map(scale).batch(240000)
 
     model = tf.keras.models.Sequential([
-        tf.keras.layers.Flatten(input_shape=(28, 28)),
+        tf.keras.layers.Flatten(input_shape=(28, 28, 1)),
         tf.keras.layers.Dense(128, activation='relu'),
         tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Dense(10)
@@ -91,9 +127,9 @@ def newModelEMNIST(epochNum):
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
 
-    model.fit(generator(emnist_train), epochs=epochNum)
+    model.fit(emnist_train, epochs=epochNum, steps_per_epoch=240000)
 
-    metrics = model.evaluate(generator(emnist_test), verbose=2)
+    metrics = model.evaluate(emnist_test, verbose=2)
 
     probability_model = tf.keras.Sequential([
         model,
