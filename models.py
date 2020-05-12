@@ -9,25 +9,6 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 from itertools import cycle
 
-"""
-class multiGenerator(object):
-    def __init__(self, gFunction, *args, **kwargs):
-        self.__gFunction = gFunction
-        self.__args = args
-        self.__kwargs = kwargs
-        self.__gObject = None
-    def __iter__(self):
-        return self
-    def next(self):
-        if self.__gObject is None:
-            self.__gObject = self.__gFunction(*self.__args, **self.__kwargs)
-        try:
-            return self.__gObject.next()
-        except StopIteration:
-            self.__gObject = None
-            raise
-"""
-
 ## @function generator
 #  @brief A generator function for iterating through the dataset dictionary objects.
 #  @details A generator function for iterating through the dataset dictionary objects. Since a
@@ -55,34 +36,27 @@ def generator(dataset):
 #  @param epochNum The number of epochs to run during the training of the model
 #  @return Returns a tuple of length 3 containing, in order, the loss of the model, the accuracy of
 #  the model and the model itself.
-def newModelMNIST(epochNum):
-    mnist = tf.keras.datasets.mnist
+def newModelMNIST(p_epochNum, p_batchSize):
 
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
-    x_train, x_test = x_train / 255.0, x_test / 255.0
+    datasets = tfds.load(name='mnist', as_supervised=True)
+
+    mnist_train = datasets['train'].batch(p_batchSize).repeat()
+    mnist_test = datasets['test'].batch(p_batchSize).repeat()
 
     model = tf.keras.models.Sequential([
-        tf.keras.layers.Flatten(input_shape=(28, 28)),
+        tf.keras.layers.Flatten(input_shape=(28, 28, 1)),
         tf.keras.layers.Dense(128, activation='relu'),
         tf.keras.layers.Dropout(0.2),
         tf.keras.layers.Dense(10)
     ])
 
-    predictions = model(x_train[:1]).numpy()
-
-    tf.nn.softmax(predictions).numpy()
-
-    loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-
-    loss_fn(y_train[:1], predictions).numpy()
-
     model.compile(optimizer='adam',
-                  loss=loss_fn,
+                  loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
 
-    model.fit(x_train, y_train, epochs=epochNum)
+    model.fit(mnist_train, epochs=p_epochNum, steps_per_epoch=(60000//p_batchSize))
 
-    metrics = model.evaluate(x_test,  y_test, verbose=2)
+    metrics = model.evaluate(mnist_test, verbose=2, steps=(60000//p_batchSize))
 
     probability_model = tf.keras.Sequential([
         model,
@@ -98,23 +72,15 @@ def newModelMNIST(epochNum):
 #  the dataset is loaded as two different tf.data.dataset objects, which are used to train the
 #  model, and then evaluate its metrics.
 #  @param epochNum The number of epochs to run during the training of the model
+#  @param p_batchSize The number of data points in one batch
 #  @return Returns a tuple of length 3 containing, in order, the loss of the model, the accuracy of
 #  the model and the model itself.
-def newModelEMNIST(epochNum):
+def newModelEMNIST(p_epochNum, p_batchSize):
 
     datasets = tfds.load(name='emnist/digits', as_supervised=True)
 
-    emnist_train = datasets['train']
-    emnist_test = datasets['test']
-
-    def scale(image, label):
-        image = tf.cast(image, tf.float32)
-        image /= 255.0
-
-        return image, label
-
-    emnist_train = emnist_train.map(scale).shuffle(10000).batch(240000)
-    emnist_test = emnist_test.map(scale).batch(240000)
+    emnist_train = datasets['train'].batch(p_batchSize).repeat()
+    emnist_test = datasets['test'].batch(p_batchSize).repeat()
 
     model = tf.keras.models.Sequential([
         tf.keras.layers.Flatten(input_shape=(28, 28, 1)),
@@ -127,9 +93,9 @@ def newModelEMNIST(epochNum):
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
                   metrics=['accuracy'])
 
-    model.fit(emnist_train, epochs=epochNum, steps_per_epoch=240000)
+    model.fit(emnist_train, epochs=p_epochNum, steps_per_epoch=(240000//p_batchSize))
 
-    metrics = model.evaluate(emnist_test, verbose=2)
+    metrics = model.evaluate(emnist_test, verbose=2, steps=(240000//p_batchSize))
 
     probability_model = tf.keras.Sequential([
         model,

@@ -18,6 +18,8 @@ if (newOrLoad == 'N'):
     datasetChoice = input()
     print("How many epochs would you like to run?")
     epochNumber = input()
+    print("What is the batch size of your model?")
+    batchSize = input()
     print("Enter a name for the model: ")
     modelName = input()
 
@@ -34,7 +36,7 @@ if (newOrLoad == 'N'):
         currentModel.summary()
     
     elif (datasetChoice == 'E'):
-        createdModel = models.newModelEMNIST(int(epochNumber))
+        createdModel = models.newModelEMNIST(int(epochNumber), int(batchSize))
 
         print("Created EMNIST model with the following metrics:")
         print("Loss: ", createdModel[0])
